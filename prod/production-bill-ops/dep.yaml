@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
       - name: app
-        image: asia-southeast1-docker.pkg.dev//prod/platform-bill-ops:release.v250826.8
+        image: asia-south1-docker.pkg.dev/cloudverse-au/prod/platform-bill-ops@sha256:97533371859eca719de029612ec4cafa44476dc2148dab35bbec7a49c2b54365
         imagePullPolicy: IfNotPresent
         resources:
           limits:
