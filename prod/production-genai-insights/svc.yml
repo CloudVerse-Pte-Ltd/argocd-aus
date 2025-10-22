@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: production-genai-insights
+  namespace: production
+  labels:
+    service: production-genai-insights
+    app.kubernetes.io/instance: production-genai-insights   # 👈 add this
+spec:
+  selector:
+    dep: production-genai-insights
+    app.kubernetes.io/instance: production-genai-insights   # 👈 add this
+  type: LoadBalancer
+  ports:
+    - port: 8000
+      targetPort: 8000
