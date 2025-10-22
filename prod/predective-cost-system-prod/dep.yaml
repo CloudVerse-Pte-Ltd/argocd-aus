@@ -1,0 +1,33 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: predective-cost-system-prod
+  labels:
+    app: predective-cost-system-prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: predective-cost-system-prod
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 0%
+  template:
+    metadata:
+      labels:
+        app: predective-cost-system-prod
+    spec:
+      containers:
+      - name: predective-cost-system-prod
+        image: asia-southeast1-docker.pkg.dev/cloudverse-foundation/prod/predective-cost-system:v.17
+        imagePullPolicy: IfNotPresent
+        envFrom:
+        - secretRef:
+            name: prod-predective-cost-system
+        ports:
+        - containerPort: 8000   # FastAPI
+        - containerPort: 5000   # MLflow
+      
