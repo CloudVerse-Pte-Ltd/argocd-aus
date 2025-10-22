@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: bill-ops
+  namespace: production
+  labels:
+    service: bill-ops
+spec:
+  selector:
+    dep: bill-ops
+  type: ClusterIP
+  ports:
+  - port: 3110
+    targetPort: 3110
