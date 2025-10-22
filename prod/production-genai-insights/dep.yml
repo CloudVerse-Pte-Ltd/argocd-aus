@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
       - name: app
-        image: asia-southeast1-docker.pkg.dev/cloudverse-foundation/prod/genai-insights:v.1
+        image: asia-south1-docker.pkg.dev/cloudverse-au/prod/genai-insights@sha256:76147c01a65d83e78deca39da18717f63f5360c1e9f4c7d4ce0c07e25b1ddd39
         imagePullPolicy: IfNotPresent
         envFrom:
         - secretRef:
