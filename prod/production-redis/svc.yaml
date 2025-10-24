@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: production-redis-svc
+  namespace: production
+spec:
+  type: NodePort
+  ports:
+  - name: production-redis-port
+    port: 6379
+    targetPort: 6379
+  selector:
+    app: production-redis
