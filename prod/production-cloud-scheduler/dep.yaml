@@ -63,7 +63,7 @@ spec:
 
       # Celery Worker container
       - name: production-cloud-scheduler-worker
-        image: asia-southeast1-docker.pkg.dev/cloudverse-foundation/prod/cloud-scheduler:release.v6
+        image: asia-south1-docker.pkg.dev/cloudverse-au/prod/cloud-scheduler@sha256:1e54447efa795aa46242f92e45cc1567f96bbe62213cad00cdc739f98c8674bf
         imagePullPolicy: Always
         command: ["celery"]
         args: ["-A", "app.celery_app", "worker", "--loglevel=INFO", "-Q", "default"]
