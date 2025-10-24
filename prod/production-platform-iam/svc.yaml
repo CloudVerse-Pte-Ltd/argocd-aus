@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: production-platform-iam-svc
+  namespace: production
+  labels:
+    service: production-platform-iam
+spec:
+  selector:
+    dep: production-platform-iam
+  type: ClusterIP
+  ports:
+  - port: 3000
+    targetPort: 3000
