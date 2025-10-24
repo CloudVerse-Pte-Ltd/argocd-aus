@@ -1,0 +1,107 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: production-cloud-provider-driver-deployment
+  namespace: production
+  labels:
+    dep: production-cloud-provider-driver
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      dep: production-cloud-provider-driver
+  minReadySeconds: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 50%
+  template:
+    metadata:
+      namespace: production
+      name: production-cloud-provider-driver
+      labels:
+        dep: production-cloud-provider-driver
+    spec:
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: "kubernetes.io/hostname"
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            dep: production-cloud-provider-driver
+      affinity:
+        # podAntiAffinity:
+        #   requiredDuringSchedulingIgnoredDuringExecution:
+        #     - labelSelector:
+        #         matchExpressions:
+        #           - key: dep
+        #             operator: In
+        #             values:
+        #               - production-cloud-provider-driver
+        #       topologyKey: cloud.google.com/gke-nodepool
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            preference:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - cloud-provider-driver
+      tolerations:
+      - key: "app"
+        operator: "Equal"
+        value: "cloud-provider-driver"
+        effect: "NoSchedule"
+      containers:
+      - name: production-cloud-provider-driver-pod
+        image: asia-southeast1-docker.pkg.dev/cloudverse-foundation/prod/cloud-provider-driver:release.v251024.2
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: 100m
+            memory: 500Mi
+        ports:
+        - containerPort: 3000
+        readinessProbe:
+          tcpSocket:
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        volumeMounts:
+        - name: production-cloud-provider-driver-aws-credentials-secret
+          mountPath: /root/.aws/credentials
+          subPath: credentials
+        - name: production-cloud-provider-driver-gcp-credentials-secret
+          mountPath: /app/gcp_credentials.json
+          subPath: gcp_credentials.json
+        - name: looker
+          mountPath: /app/looker.ini
+          subPath: looker.ini
+        - name: oci
+          mountPath: /app/oci_api_key.pem
+          subPath: oci_api_key.pem
+        - name: oci
+          mountPath: /app/oci_api_key_public.pem
+          subPath: oci_api_key_public.pem
+        envFrom:
+        - secretRef:
+            name: production-common-secret
+        - secretRef:
+            name: production-cloud-provider-driver-secret
+      volumes:
+      - name: production-cloud-provider-driver-aws-credentials-secret
+        secret:
+          secretName: production-cloud-provider-driver-aws-credentials-secret
+      - name: production-cloud-provider-driver-gcp-credentials-secret
+        secret:
+          secretName: production-cloud-provider-driver-gcp-credentials-secret
+      - name: looker
+        secret:
+          secretName: looker
+      - name: oci
+        secret:
+          secretName: production-oci-api-key
