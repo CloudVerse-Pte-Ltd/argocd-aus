@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: production-aio-frontend-deployment
+  namespace: production
+  labels:
+    dep: production-aio-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      dep: production-aio-frontend
+  template:
+    metadata:
+      namespace: production
+      name: production-aio-frontend
+      labels:
+        dep: production-aio-frontend
+    spec:
+      securityContext:
+        seccompProfile:
+          type: Unconfined
+      nodeSelector:
+        role: app
+      containers:
+      - name: production-aio-frontend-pod
+        image: asia-southeast1-docker.pkg.dev/cloudverse-foundation/prod/external-endpoint@sha256:24acb19309e7d2a0a87110d916f90bc84710460d90d468169982a1c1062e042d
+        imagePullPolicy: Always
+        resources: {}
+        ports:
+        - containerPort: 3000
+        - containerPort: 3010
+        - containerPort: 3020
+        volumeMounts:
+        - name: production-identity-keystore-secret
+          mountPath: /opt/app/apps/identity/keystore.json
+          subPath: keystore.json
+        - name: production-cloud-provider-driver-gcp-credentials-secret
+          mountPath: /opt/app/apps/finops/gcp_credentials.json
+          subPath: gcp_credentials.json
+      volumes:
+        - name: production-identity-keystore-secret
+          secret:
+            secretName: production-identity-keystore-secret
+        - name: production-cloud-provider-driver-gcp-credentials-secret
+          secret:
+            secretName: production-cloud-provider-driver-gcp-credentials-secret
