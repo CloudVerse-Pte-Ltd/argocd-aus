@@ -24,7 +24,7 @@ spec:
           type: Unconfined
       containers:
       - name: production-cronicle-schedule-custom-pod
-        image: asia-southeast1-docker.pkg.dev/cloudverse-foundation/prod/cronicle-schedule-custom:release.v1.1.0
+        image: asia-south1-docker.pkg.dev/cloudverse-au/prod/cronicle-schedule-custom@sha256:fd9099a01c1bc1d26e71718f548c3e60c472a32336ce8538adabb45c90e736b4
 
         imagePullPolicy: Always
         resources:
