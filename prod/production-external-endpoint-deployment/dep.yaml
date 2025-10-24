@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: production-external-endpoint-deployment
+  namespace: production
+  labels:
+    dep: external-endpoint
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      dep: external-endpoint
+  minReadySeconds: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 50%
+  template:
+    metadata:
+      namespace: production
+      name: external-endpoint
+      labels:
+        dep: external-endpoint
+    spec:
+      nodeSelector:
+        role: app
+      containers:
+      - name: prod-external-endpoint-pod
+        image: asia-south1-docker.pkg.dev/cloudverse-au/prod/external-endpoint@sha256:24acb19309e7d2a0a87110d916f90bc84710460d90d468169982a1c1062e042d
+        imagePullPolicy: Always
+        resources: {}
+        ports:
+        - containerPort: 3000
+        readinessProbe:
+          tcpSocket:
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        envFrom:
+        - secretRef:
+            name: production-external-endpoint-secret
