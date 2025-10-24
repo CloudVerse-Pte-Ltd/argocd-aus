@@ -1,0 +1,87 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: production-platform-notification-deployment
+  namespace: production
+  labels:
+    dep: production-platform-notification
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      dep: production-platform-notification
+  minReadySeconds: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 50%
+  template:
+    metadata:
+      namespace: production
+      name: production-platform-notification
+      labels:
+        dep: production-platform-notification
+    spec:
+      topologySpreadConstraints:
+          - maxSkew: 1
+            topologyKey: kubernetes.io/hostname
+            whenUnsatisfiable: ScheduleAnyway
+            labelSelector:
+              matchLabels:
+                dep: production-platform-notification
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 2
+              preference:
+                matchExpressions:
+                - key: eks.amazonaws.com/nodegroup
+                  operator: In
+                  values:
+                    - "production-nodes"
+            - weight: 1
+              preference:
+                matchExpressions:
+                - key: karpenter.sh/provisioner-name
+                  operator: In
+                  values:
+                    - "app"
+      nodeSelector:
+        role: app
+      containers:
+      - name: production-platform-notification-pod
+        image: asia-southeast1-docker.pkg.dev/cloudverse-foundation/prod/platform-notification:release.v250623.1
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: "100m"
+            memory: 1Gi
+        ports:
+        - containerPort: 3000
+        readinessProbe:
+          tcpSocket:
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        volumeMounts:
+        - name: production-cloud-provider-driver-aws-credentials-secret
+          mountPath: /root/.aws/credentials
+          subPath: credentials
+        - name: production-cloud-provider-driver-gcp-credentials-secret
+          mountPath: /app/gcp_credentials.json
+          subPath: gcp_credentials.json
+        envFrom:
+        - secretRef:
+            name: production-common-secret
+        - secretRef:
+            name: production-notification-secret
+      volumes:
+      - name: production-cloud-provider-driver-aws-credentials-secret
+        secret:
+          secretName: production-cloud-provider-driver-aws-credentials-secret
+      - name: production-cloud-provider-driver-gcp-credentials-secret
+        secret:
+          secretName: production-cloud-provider-driver-gcp-credentials-secret
