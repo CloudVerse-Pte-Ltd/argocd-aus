@@ -1,0 +1,73 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: production-platform-alarm-deployment
+  namespace: production
+  labels:
+    dep: production-platform-alarm
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      dep: production-platform-alarm
+  minReadySeconds: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 50%
+  template:
+    metadata:
+      namespace: production
+      name: production-platform-alarm
+      labels:
+        dep: production-platform-alarm
+    spec:
+      topologySpreadConstraints:
+          - maxSkew: 1
+            topologyKey: kubernetes.io/hostname
+            whenUnsatisfiable: ScheduleAnyway
+            labelSelector:
+              matchLabels:
+                dep: production-platform-alarm
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 2
+              preference:
+                matchExpressions:
+                - key: eks.amazonaws.com/nodegroup
+                  operator: In
+                  values:
+                    - "production-nodes"
+            - weight: 1
+              preference:
+                matchExpressions:
+                - key: karpenter.sh/provisioner-name
+                  operator: In
+                  values:
+                    - "app"
+      nodeSelector:
+        role: app
+      containers:
+      - name: production-platform-alarm-pod
+        image: asia-southeast1-docker.pkg.dev/cloudverse-foundation/prod/platform-alarm:release.v250205.1-6e8ba60
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "500Mi"
+        ports:
+        - containerPort: 3000
+        readinessProbe:
+          tcpSocket:
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        envFrom:
+        - secretRef:
+            name: production-common-secret
+        - secretRef:
+            name: production-alarm-secret
