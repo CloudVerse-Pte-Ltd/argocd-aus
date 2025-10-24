@@ -1,0 +1,32 @@
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: production-cloud-provider-driver-bff
+  namespace: production
+  labels:
+    dep: production-cloud-provider-driver-bff
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      dep: production-cloud-provider-driver-bff
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 0%
+  template:
+    metadata:
+      name: production-cloud-provider-driver-bff
+      labels:
+        dep: production-cloud-provider-driver-bff
+    spec:
+      containers:
+      - name: app
+        image: asia-south1-docker.pkg.dev/cloudverse-au/prod/cloud-provider-driver-bff@sha256:d95be8f01b4486c7953d55a7ecd97a3587b0efa8edd6ee719896c87fc9d180d0
+        imagePullPolicy: IfNotPresent
+        envFrom:
+        - secretRef:
+            name: production-cloud-provider-driver-bff
