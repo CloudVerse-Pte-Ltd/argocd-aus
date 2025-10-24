@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: production
+  name: production-redis-dep
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: production-redis
+  template: 
+    metadata:
+      labels:
+        app: production-redis
+    spec:
+      containers:
+      - name: redis
+        image: asia-south1-docker.pkg.dev/cloudverse-au/prod/cloudverse-redis@sha256:fb837decca4092e94344a2fdbc45045551b487189fad1061c2549aa13aca7f46
+        imagePullPolicy: Always
+        ports:
+        - name: prod-redis-port
+          containerPort: 6379
+        volumeMounts:
+        # - name: production-redis-pvc
+        #   mountPath: /var/lib/redis
+        - name: production-redis-conf
+          subPath: redis.conf
+          mountPath: /etc/redis.conf
+      volumes:
+      # - name: production-redis-pvc
+      #   persistentVolumeClaim:
+      #     claimName: production-redis-pvc
+      - name: production-redis-conf     
+        configMap:
+          name: production-redis-conf
