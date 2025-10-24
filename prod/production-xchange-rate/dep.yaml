@@ -1,0 +1,42 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: production-xchange-rate
+  namespace: production
+  labels:
+    dep: production-xchange-rate
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      dep: production-xchange-rate
+  minReadySeconds: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 50%
+  template:
+    metadata:
+      name: production-xchange-rate
+      labels:
+        dep: production-xchange-rate
+    spec:
+      nodeSelector:
+        role: app
+      securityContext:
+        seccompProfile:
+          type: Unconfined
+      containers:
+      - name: production-xchange-rate-pod
+        image: asia-south1-docker.pkg.dev/cloudverse-au/prod/xchange-rate@sha256:5049d1efc14185cff63b05d7a8771a4c48f1dbb35d78973caab25f6f11584963
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5444
+        envFrom:
+        - secretRef:
+            name: production-xchange-secret
+        - secretRef:
+            name: production-common-secret
