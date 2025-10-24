@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: token-revoker
+  namespace: production
+  labels:
+    service: token-revoker
+spec:
+  selector:
+    dep: token-revoker
+  type: ClusterIP
+  ports:
+  - port: 3500
+    targetPort: 3500
