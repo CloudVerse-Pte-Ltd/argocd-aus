@@ -1,0 +1,73 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: production-platform-budget-deployment
+  namespace: production
+  labels:
+    dep: production-platform-budget
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      dep: production-platform-budget
+  minReadySeconds: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 50%
+  template:
+    metadata:
+      namespace: production
+      name: production-platform-budget
+      labels:
+        dep: production-platform-budget
+    spec:
+      topologySpreadConstraints:
+          - maxSkew: 1
+            topologyKey: kubernetes.io/hostname
+            whenUnsatisfiable: ScheduleAnyway
+            labelSelector:
+              matchLabels:
+                dep: production-platform-budget
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 2
+              preference:
+                matchExpressions:
+                - key: eks.amazonaws.com/nodegroup
+                  operator: In
+                  values:
+                    - "production-nodes"
+            - weight: 1
+              preference:
+                matchExpressions:
+                - key: karpenter.sh/provisioner-name
+                  operator: In
+                  values:
+                    - "app"
+      nodeSelector:
+        role: app
+      containers:
+      - name: production-platform-budget-pod
+        image: asia-south1-docker.pkg.dev/cloudverse-au/prod/platform-budget@sha256:66d300f837cc339366d33d1429fbfa1d8150e693ebf2a555c5c8cc9d4fe4c7eb
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "500Mi"
+        ports:
+        - containerPort: 3000
+        readinessProbe:
+          tcpSocket:
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        envFrom:
+        - secretRef:
+            name: production-common-secret
+        - secretRef:
+            name: production-budget-secret
