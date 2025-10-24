@@ -1,0 +1,19 @@
+# define your template in a config map
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: env-file
+  namespace: production
+data:
+  .env: |-
+    {{ .env }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keystore-conf
+  namespace: production
+data:
+  keystore.json: |-
+    {{ .keystore }}
