@@ -1,0 +1,55 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: production-krakend-dep
+  namespace: production
+spec:
+  selector:
+    matchLabels:
+      dep: production-krakend
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        dep: production-krakend
+    spec:
+      topologySpreadConstraints:
+          - maxSkew: 1
+            topologyKey: kubernetes.io/hostname
+            whenUnsatisfiable: ScheduleAnyway
+            labelSelector:
+              matchLabels:
+                dep: production-krakend
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 2
+              preference:
+                matchExpressions:
+                - key: eks.amazonaws.com/nodegroup
+                  operator: In
+                  values:
+                    - "production-nodes"
+            - weight: 1
+              preference:
+                matchExpressions:
+                - key: karpenter.sh/provisioner-name
+                  operator: In
+                  values:
+                    - "app"
+      nodeSelector:
+        role: app
+      containers:
+      - name: production-krakend-pod
+        image: asia-south1-docker.pkg.dev/cloudverse-au/prod/krakend@sha256:4302b6d9bb9c3e31550dbd1ab97eacdefb20034909e63b2a00a760ebf89c4d85
+        ports:
+        - containerPort: 8400
+        readinessProbe:
+          tcpSocket:
+            port: 8400
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        imagePullPolicy: Always
+        command: ["/usr/bin/krakend"]
+        args: ["run", "-c", "/etc/krakend/krakend.json", "-p", "8400"]
