@@ -53,7 +53,7 @@ spec:
         role: app
       containers:
       - name: production-platform-alarm-pod
-        image: asia-southeast1-docker.pkg.dev/cloudverse-foundation/prod/platform-alarm:release.v250205.1-6e8ba60
+        image: asia-south1-docker.pkg.dev/cloudverse-au/prod/platform-alarm@sha256:6b3a0fd2027dd5d56d6045ab9fcf3683d5c6ed46777ce7c9d2ae35134e3f9a49
         imagePullPolicy: Always
         resources:
           requests:
