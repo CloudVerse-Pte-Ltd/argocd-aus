@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
       - name: app
-        image: asia-southeast1-docker.pkg.dev/cloudverse-foundation/prod/token-revoker:0.1.0-48eece9
+        image: asia-south1-docker.pkg.dev/cloudverse-au/prod/token-revoker:latest
         imagePullPolicy: IfNotPresent
         env:
           - name: PORT
