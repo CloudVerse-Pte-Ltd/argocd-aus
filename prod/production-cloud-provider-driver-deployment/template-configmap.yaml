@@ -1,0 +1,18 @@
+# define your template in a config map
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aws-credentials-conf
+  namespace: production
+data:
+  credentials: |-
+    {{ .credentials }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gcp-credentials-conf
+  namespace: production
+data:
+  gcp_credentials.json: |-
+    {{ .gcp_credentials }}
