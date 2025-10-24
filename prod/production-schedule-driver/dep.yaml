@@ -1,0 +1,73 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: production-schedule-driver-deployment
+  namespace: production
+  labels:
+    dep: production-schedule-driver
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      dep: production-schedule-driver
+  minReadySeconds: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 50%
+  template:
+    metadata:
+      namespace: production
+      name: production-schedule-driver
+      labels:
+        dep: production-schedule-driver
+    spec:
+      topologySpreadConstraints:
+          - maxSkew: 1
+            topologyKey: kubernetes.io/hostname
+            whenUnsatisfiable: ScheduleAnyway
+            labelSelector:
+              matchLabels:
+                dep: production-schedule-driver
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 2
+              preference:
+                matchExpressions:
+                - key: eks.amazonaws.com/nodegroup
+                  operator: In
+                  values:
+                    - "production-nodes"
+            - weight: 1
+              preference:
+                matchExpressions:
+                - key: karpenter.sh/provisioner-name
+                  operator: In
+                  values:
+                    - "app"
+      nodeSelector:
+        role: app
+      containers:
+      - name: production-schedule-driver-pod
+        image: asia-south1-docker.pkg.dev/cloudverse-au/prod/schedule-driver@sha256:77a44fdd5a269c11599b06ab7a689d7ee2003f8e2f88dfdae333a21bb086e43a
+        imagePullPolicy: Always
+        resources: 
+          requests:
+            cpu: 100m
+            memory: 400Mi
+        ports:
+        - containerPort: 3000
+        readinessProbe:
+          tcpSocket:
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        envFrom:
+        - secretRef:
+            name: production-common-secret
+        - secretRef:
+            name: production-schedule-driver-secret
