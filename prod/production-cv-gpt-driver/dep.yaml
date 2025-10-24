@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: production-cv-gpt-driver
+  namespace: production
+  labels:
+    dep: production-cv-gpt-driver
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      dep: production-cv-gpt-driver
+  minReadySeconds: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 50%
+  template:
+    metadata:
+      namespace: production
+      name: production-cv-gpt-driver
+      labels:
+        dep: production-cv-gpt-driver
+    spec:
+      serviceAccountName: production-ksa
+      nodeSelector:
+        role: app
+      containers:
+      - name: production-cv-gpt-driver-pod
+        image: asia-southeast1-docker.pkg.dev/cloudverse-foundation/prod/cv-gpt-driver:release.v250731.1
+        imagePullPolicy: Always
+        resources: {}
+        ports:
+        - containerPort: 5555
+        envFrom:
+        - secretRef:
+            name: production-cv-gpt-driver-secret
+        - secretRef:
+            name: production-common-secret
+        readinessProbe:
+          tcpSocket:
+            port: 5555
+          initialDelaySeconds: 30
+          periodSeconds: 20
+          timeoutSeconds: 5
+        livenessProbe:
+          tcpSocket:
+            port: 5555
+          initialDelaySeconds: 60
+          periodSeconds: 20
+          timeoutSeconds: 5
+      terminationGracePeriodSeconds: 60
