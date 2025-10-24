@@ -1,0 +1,40 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: token-revoker
+  namespace: production
+  labels:
+    dep: token-revoker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      dep: token-revoker
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 0%
+  template:
+    metadata:
+      name: token-revoker
+      labels:
+        dep: token-revoker
+    spec:
+      containers:
+      - name: app
+        image: asia-southeast1-docker.pkg.dev/cloudverse-foundation/prod/token-revoker:0.1.0-48eece9
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: PORT
+            value: "3500"
+          - name: KRAKEND_REVOKE_SERVER_URL
+            value: production-krakend-svc:8081
+        resources:
+          limits:
+            cpu: "250m"
+            memory: "512Mi"
+          requests:
+            cpu: "25m"
+            memory: "50Mi"
