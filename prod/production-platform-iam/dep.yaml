@@ -53,7 +53,7 @@ spec:
         role: app
       containers:
       - name: production-platform-iam-pod
-        image: asia-southeast1-docker.pkg.dev/cloudverse-foundation/prod/platform-iam:release.v251021.1
+        image: asia-south1-docker.pkg.dev/cloudverse-au/prod/platform-iam@sha256:f518b70e24f2affb5941c85e6932277b34c36c1f5b1e8f3b0e192175efa6bb8c
         imagePullPolicy: Always
         resources:
           requests:
