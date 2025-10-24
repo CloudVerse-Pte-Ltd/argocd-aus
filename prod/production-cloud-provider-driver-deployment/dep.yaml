@@ -58,7 +58,7 @@ spec:
         effect: "NoSchedule"
       containers:
       - name: production-cloud-provider-driver-pod
-        image: asia-southeast1-docker.pkg.dev/cloudverse-foundation/prod/cloud-provider-driver:release.v251024.2
+        image: asia-south1-docker.pkg.dev/cloudverse-au/prod/cloud-provider-driver@sha256:d48d5ba390bc37b250d271854dd051e9bf7ffdab373478617fac460f3f62e2a1
         imagePullPolicy: Always
         resources:
           requests:
