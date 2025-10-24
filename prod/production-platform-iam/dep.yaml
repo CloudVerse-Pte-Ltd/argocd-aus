@@ -1,0 +1,73 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: production-platform-iam-deployment
+  namespace: production
+  labels:
+    dep: production-platform-iam
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      dep: production-platform-iam
+  minReadySeconds: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 50%
+  template:
+    metadata:
+      namespace: production
+      name: production-platform-iam
+      labels:
+        dep: production-platform-iam
+    spec:
+      topologySpreadConstraints:
+          - maxSkew: 1
+            topologyKey: kubernetes.io/hostname
+            whenUnsatisfiable: ScheduleAnyway
+            labelSelector:
+              matchLabels:
+                dep: production-platform-iam
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 2
+              preference:
+                matchExpressions:
+                - key: eks.amazonaws.com/nodegroup
+                  operator: In
+                  values:
+                    - "production-nodes"
+            - weight: 1
+              preference:
+                matchExpressions:
+                - key: karpenter.sh/provisioner-name
+                  operator: In
+                  values:
+                    - "app"
+      nodeSelector:
+        role: app
+      containers:
+      - name: production-platform-iam-pod
+        image: asia-southeast1-docker.pkg.dev/cloudverse-foundation/prod/platform-iam:release.v251021.1
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: "0.5"
+            memory: 1Gi
+        ports:
+        - containerPort: 3000
+        readinessProbe:
+          tcpSocket:
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        envFrom:
+        - secretRef:
+            name: production-common-secret
+        - secretRef:
+            name: production-iam-secret
