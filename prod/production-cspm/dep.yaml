@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: production-cspm
+  namespace: production
+  labels:
+    dep: production-cspm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      dep: production-cspm
+  minReadySeconds: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 0%
+  template:
+    metadata:
+      name: production-cspm
+      labels:
+        dep: production-cspm
+    spec:
+      containers:
+      - name: production-cspm
+        image: asia-south1-docker.pkg.dev/cloudverse-au/prod/cspm@sha256:9f33ce581b7a1257820297faf20f89fde8e8e95aa385fc112090a4c79d3b71e3
+        imagePullPolicy: Always
+        resources:
+          limits:
+            cpu: "1"
+            memory: "1Gi"
+          requests:
+            cpu: "50m"
+            memory: "128Mi"
+        envFrom:
+        - secretRef:
+            name: production-common-secret
+        - secretRef:
+            name: production-cspm
+        volumeMounts:
+        - name: production-cloud-discovery-v2-aws-credentials-secret
+          mountPath: /root/.aws/credentials
+          subPath: credentials
+        - name: production-cloud-discovery-v2-gcp-credentials-secret
+          mountPath: /app/gcp_credentials.json
+          subPath: gcp_credentials.json
+      volumes:
+      - name: production-cloud-discovery-v2-aws-credentials-secret
+        secret:
+          secretName: production-cloud-provider-driver-aws-credentials-secret
+      - name: production-cloud-discovery-v2-gcp-credentials-secret
+        secret:
+          secretName: production-cloud-provider-driver-gcp-credentials-secret
