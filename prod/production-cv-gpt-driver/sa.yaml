@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: production-ksa
+  namespace: production
+  annotations:
+    iam.gke.io/gcp-service-account: cloud-invoker@ai-projects-431207.iam.gserviceaccount.com
