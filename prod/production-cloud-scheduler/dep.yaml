@@ -1,0 +1,84 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: production-cloud-scheduler-deployment
+  namespace: production
+  labels:
+    dep: production-cloud-scheduler
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      dep: production-cloud-scheduler
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 50%
+  template:
+    metadata:
+      labels:
+        dep: production-cloud-scheduler
+    spec:
+      tolerations:
+      - key: "app"
+        operator: "Equal"
+        value: "discovery-test"
+        effect: "NoSchedule"
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            preference:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - production-cloud-scheduler
+      containers:
+      # Flask API container
+      - name: production-cloud-scheduler-api
+        image: asia-southeast1-docker.pkg.dev/cloudverse-foundation/prod/cloud-scheduler:release.v6
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5003
+        command: ["gunicorn"]
+        args: ["-b", "0.0.0.0:5003", "run:application", "-w", "4"]
+        resources:
+          requests:
+            cpu: "2"
+            memory: "1Gi"
+          limits:
+            cpu: "7500m"
+            memory: "1Gi"
+        readinessProbe:
+          tcpSocket:
+            port: 5003
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        envFrom:
+        - secretRef:
+            name: prod-cloud-scheduler
+
+      # Celery Worker container
+      - name: production-cloud-scheduler-worker
+        image: asia-southeast1-docker.pkg.dev/cloudverse-foundation/prod/cloud-scheduler:release.v6
+        imagePullPolicy: Always
+        command: ["celery"]
+        args: ["-A", "app.celery_app", "worker", "--loglevel=INFO", "-Q", "default"]
+        resources:
+          requests:
+            cpu: "1"
+            memory: "2Gi"
+          limits:
+            cpu: "2000m"
+            memory: "6Gi"
+        readinessProbe:
+          exec:
+            command: ["sh", "-c", "pgrep -f 'celery worker' || exit 1"]
+          initialDelaySeconds: 20
+          periodSeconds: 15
+        envFrom:
+        - secretRef:
+            name: prod-cloud-scheduler
