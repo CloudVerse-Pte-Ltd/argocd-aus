@@ -1,0 +1,28 @@
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: production-cronicle-pvc
+  namespace: production
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 60Gi
+  storageClassName: premium-rwo
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: production-cronicle-backup
+  namespace: production
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 60Gi
+  storageClassName: premium-rwo
