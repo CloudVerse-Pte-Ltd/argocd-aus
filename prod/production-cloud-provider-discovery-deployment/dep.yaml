@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: production-cloud-provider-discovery-deployment
+  namespace: production
+  labels:
+    dep: production-cloud-provider-discovery
+
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      dep: production-cloud-provider-discovery
+  minReadySeconds: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 50%
+  template:
+    metadata:
+      namespace: production
+      name: production-cloud-provider-discovery
+      labels:
+        dep: production-cloud-provider-discovery
+    spec:
+      topologySpreadConstraints:
+          - maxSkew: 1
+            topologyKey: kubernetes.io/hostname
+            whenUnsatisfiable: DoNotSchedule
+            labelSelector:
+              matchLabels:
+                dep: production-cloud-provider-discovery
+      nodeSelector:
+        app: discovery
+      tolerations:
+      - key: app
+        operator: Equal
+        value: discovery
+        effect: NoSchedule
+      containers:
+      - name: production-cloud-provider-discovery-pod
+        image: asia-south1-docker.pkg.dev/cloudverse-au/prod/cloud-provider-driver@sha256:d48d5ba390bc37b250d271854dd051e9bf7ffdab373478617fac460f3f62e2a1
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: 6
+            memory: 50Gi
+        ports:
+        - containerPort: 3000
+        readinessProbe:
+          tcpSocket:
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        volumeMounts:
+        - name: production-cloud-provider-driver-aws-credentials-secret
+          mountPath: /root/.aws/credentials
+          subPath: credentials
+        - name: production-cloud-provider-driver-gcp-credentials-secret
+          mountPath: /app/gcp_credentials.json
+          subPath: gcp_credentials.json
+        - name: looker
+          mountPath: /app/looker.ini
+          subPath: looker.ini
+        - name: oci
+          mountPath: /app/oci_api_key.pem
+          subPath: oci_api_key.pem
+        - name: oci
+          mountPath: /app/oci_api_key_public.pem
+          subPath: oci_api_key_public.pem
+        envFrom:
+        - secretRef:
+            name: production-common-secret
+        - secretRef:
+            name: production-cloud-provider-discovery-secret
+      volumes:
+      - name: production-cloud-provider-driver-aws-credentials-secret
+        secret:
+          secretName: production-cloud-provider-driver-aws-credentials-secret
+      - name: production-cloud-provider-driver-gcp-credentials-secret
+        secret:
+          secretName: production-cloud-provider-driver-gcp-credentials-secret
+      - name: looker
+        secret:
+          secretName: looker
+      - name: oci
+        secret:
+          secretName: production-oci-api-key
+#
