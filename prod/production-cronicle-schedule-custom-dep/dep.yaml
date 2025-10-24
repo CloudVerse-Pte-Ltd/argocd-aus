@@ -1,0 +1,54 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: production-cronicle-schedule-custom-dep
+  namespace: production
+  labels:
+    dep: production-cronicle-schedule-custom
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      dep: production-cronicle-schedule-custom
+  template:
+    metadata:
+      namespace: production
+      name: production-cronicle-schedule-custom
+      labels:
+        dep: production-cronicle-schedule-custom
+    spec:
+      securityContext:
+        seccompProfile:
+          type: Unconfined
+      containers:
+      - name: production-cronicle-schedule-custom-pod
+        image: asia-southeast1-docker.pkg.dev/cloudverse-foundation/prod/cronicle-schedule-custom:release.v1.1.0
+
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: 1.5
+            memory: 2Gi
+        ports:
+        - containerPort: 3012
+        envFrom:
+        - secretRef:
+            name: production-cronicle-schedule-custom-secret
+        volumeMounts:
+        - name: production-cronicle-pvc
+          mountPath: /opt/cronicle/data
+          subPath: data
+        - name: production-cronicle-pvc
+          mountPath: /opt/cronicle/logs
+          subPath: logs
+        - name: production-cronicle-backup
+          mountPath: /backup
+      volumes:
+      - name: production-cronicle-pvc
+        persistentVolumeClaim:
+          claimName: production-cronicle-pvc
+      - name: production-cronicle-backup
+        persistentVolumeClaim:
+          claimName: production-cronicle-backup
