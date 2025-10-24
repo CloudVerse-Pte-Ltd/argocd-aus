@@ -29,7 +29,7 @@ spec:
         role: app
       containers:
       - name: production-cv-gpt-driver-pod
-        image: asia-southeast1-docker.pkg.dev/cloudverse-foundation/prod/cv-gpt-driver:release.v250731.1
+        image: asia-south1-docker.pkg.dev/cloudverse-au/prod/cv-gpt-driver@sha256:33caff521d0e09363db5161fa5b9085621ce3bd7b61e2830c66e9d1127712f60
         imagePullPolicy: Always
         resources: {}
         ports:
