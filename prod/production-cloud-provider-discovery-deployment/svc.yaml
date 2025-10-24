@@ -1,0 +1,15 @@
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: production-cloud-provider-discovery-svc
+  namespace: production
+  labels:
+    service: production-cloud-provider-discovery
+spec:
+  selector:
+    dep: production-cloud-provider-discovery
+  type: ClusterIP
+  ports:
+  - port: 3000
+    targetPort: 3000
