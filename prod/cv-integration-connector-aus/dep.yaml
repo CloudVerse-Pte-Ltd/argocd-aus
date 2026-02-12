@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: asia-southeast1-docker.pkg.dev/cloudverse-foundation/prod/cv-integration-connector:release.v260204
+          image: asia-south1-docker.pkg.dev/cloudverse-au/prod/cv-integration-connector-aus:release.v260204-a7b1e7b
           imagePullPolicy: IfNotPresent
           envFrom:
             - secretRef:
