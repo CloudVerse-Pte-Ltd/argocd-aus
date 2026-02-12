@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cv-data-transform
+  labels:
+    dep: cv-data-transform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      dep: cv-data-transform
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 0%
+  template:
+    metadata:
+      labels:
+        dep: cv-data-transform
+    spec:
+      containers:
+        - name: app
+          image: asia-southeast1-docker.pkg.dev/cloudverse-foundation/prod/cv-data-transform:release.v260211.3
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - secretRef:
+                name: production-cv-data-transform
+          volumeMounts:
+            - name: gcp-credentials
+              mountPath: /app/gcp_credentials.json
+              subPath: gcp_credentials.json
+      volumes:
+        - name: gcp-credentials
+          secret:
+            # PRODUCTION GCP credentials secret
+            secretName: production-cloud-provider-driver-gcp-credentials-secret
