@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cv-integration-connector
+  labels:
+    dep: cv-integration-connector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      dep: cv-integration-connector
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 0%
+  template:
+    metadata:
+      labels:
+        dep: cv-integration-connector
+    spec:
+      containers:
+        - name: app
+          image: asia-southeast1-docker.pkg.dev/cloudverse-foundation/prod/cv-integration-connector:release.v260204
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - secretRef:
+                name: production-cv-integration-connector
+          volumeMounts:
+            - name: gcp-credentials
+              mountPath: /app/gcp_credentials.json
+              subPath: gcp_credentials.json
+      volumes:
+        - name: gcp-credentials
+          secret:
+            # PRODUCTION GCP credentials secret
+            secretName: production-cloud-provider-driver-gcp-credentials-secret
