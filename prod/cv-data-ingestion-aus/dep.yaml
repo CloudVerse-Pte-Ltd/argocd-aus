@@ -1,0 +1,41 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cv-data-ingestion
+  labels:
+    dep: cv-data-ingestion
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      dep: cv-data-ingestion
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 0%
+  template:
+    metadata:
+      labels:
+        dep: cv-data-ingestion
+    spec:
+      containers:
+        - name: app
+          image: asia-southeast1-docker.pkg.dev/cloudverse-foundation/prod/cv-data-ingestion:release.v260211.2
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          envFrom:
+            - secretRef:
+                name: production-cv-data-ingestion
+          volumeMounts:
+            - name: gcp-credentials
+              mountPath: /app/gcp_credentials.json
+              subPath: gcp_credentials.json
+      volumes:
+        - name: gcp-credentials
+          secret:
+            # PRODUCTION GCP credentials secret
+            secretName: production-cloud-provider-driver-gcp-credentials-secret
