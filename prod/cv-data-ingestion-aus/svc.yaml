@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: cv-data-ingestion
+  labels:
+    service: cv-data-ingestion
+spec:
+  selector:
+    dep: cv-data-ingestion
+  type: LoadBalancer
+  ports:
+    - port: 8080
+      targetPort: 8080
