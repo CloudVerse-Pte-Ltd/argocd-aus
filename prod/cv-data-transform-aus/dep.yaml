@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: asia-southeast1-docker.pkg.dev/cloudverse-foundation/prod/cv-data-transform:release.v260211.3
+          image: asia-south1-docker.pkg.dev/cloudverse-au/prod/cv-data-transform-aus:release.v260211.3-000e852
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
