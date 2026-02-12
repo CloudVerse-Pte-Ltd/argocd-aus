@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: asia-southeast1-docker.pkg.dev/cloudverse-foundation/prod/cv-data-ingestion:release.v260211.2
+          image: asia-south1-docker.pkg.dev/cloudverse-au/prod/cv-data-ingestion-aus:release.v260211.2-e6725e9
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
