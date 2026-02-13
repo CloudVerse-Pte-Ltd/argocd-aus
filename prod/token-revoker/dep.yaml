@@ -7,7 +7,7 @@ metadata:
   labels:
     dep: token-revoker
 spec:
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       dep: token-revoker
