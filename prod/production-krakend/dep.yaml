@@ -8,7 +8,7 @@ spec:
   selector:
     matchLabels:
       dep: production-krakend
-  replicas: 0
+  replicas: 1
   template:
     metadata:
       labels:
@@ -42,7 +42,7 @@ spec:
         role: app
       containers:
       - name: production-krakend-pod
-        image: asia-south1-docker.pkg.dev/cloudverse-au/prod/krakend@sha256:4302b6d9bb9c3e31550dbd1ab97eacdefb20034909e63b2a00a760ebf89c4d85
+        image: asia-south1-docker.pkg.dev/cloudverse-au/prod/krakend-aus:v1.6.8-1925c4d
         ports:
         - containerPort: 8400
         readinessProbe:
