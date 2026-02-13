@@ -6,7 +6,7 @@ metadata:
   labels:
     app: predective-cost-system-prod
 spec:
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       app: predective-cost-system-prod
