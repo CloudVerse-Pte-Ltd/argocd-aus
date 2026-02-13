@@ -8,7 +8,7 @@ metadata:
   labels:
     dep: production-cloud-provider-driver-bff
 spec:
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       dep: production-cloud-provider-driver-bff
