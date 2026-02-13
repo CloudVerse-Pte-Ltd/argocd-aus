@@ -4,7 +4,7 @@ metadata:
   namespace: production
   name: production-redis-dep
 spec:
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       app: production-redis
