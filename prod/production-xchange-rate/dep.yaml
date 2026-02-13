@@ -8,7 +8,7 @@ metadata:
     dep: production-xchange-rate
 
 spec:
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       dep: production-xchange-rate
