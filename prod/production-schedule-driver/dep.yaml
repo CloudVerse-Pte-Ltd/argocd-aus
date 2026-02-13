@@ -8,7 +8,7 @@ metadata:
     dep: production-schedule-driver
 
 spec:
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       dep: production-schedule-driver
