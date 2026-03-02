@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
       - name: predective-cost-system-prod
-        image: asia-south1-docker.pkg.dev/cloudverse-au/prod/predective-cost-system@sha256:v22.23
+        image: asia-south1-docker.pkg.dev/cloudverse-au/prod/predective-cost-system@sha256:v22.24
         imagePullPolicy: IfNotPresent
         envFrom:
         - secretRef:
